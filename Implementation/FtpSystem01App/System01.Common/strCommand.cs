@@ -10,5 +10,6 @@
         public const string RETRIVE = "GET";
         public const string STORE = "STO";
         public const string DELETE = "DEL";
+        public static string LISTFILES = "LSTF";
     }
 }

@@ -8,6 +8,8 @@ using System.Windows.Forms;
 using System.Security.Principal;
 using System01.Common;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 namespace FtpSystem01App
 {
     public partial class Server : Form
@@ -27,19 +29,47 @@ namespace FtpSystem01App
         }
         private void btnStopServer_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _listener.Stop();
+                _dataListener.Stop();
+
+                btnStartServer.Enabled = true;
+                btnStopServer.Enabled = false;
+                Log("FTP Server stopped");
+            }
+            catch(Exception ex)
+            {
+                Log($"Error {ex.Message}");
+            }
+            
+        }
+
+        private void toggleButtonEnablement()
+        {
+            btnStartServer.Enabled = !btnStartServer.Enabled;
+            btnStopServer.Enabled = !btnStopServer.Enabled;
         }
 
         private void btnStartServer_Click(object sender, EventArgs e)
         {
-            _listener = new TcpListener(IPAddress.Any, CommandPort);
-            _listener.Start();
+            try
+            {
+                _listener = new TcpListener(IPAddress.Any, CommandPort);
+                _listener.Start();
 
-            _dataListener = new TcpListener(IPAddress.Any, DataPort);
-            _dataListener.Start();
+                _dataListener = new TcpListener(IPAddress.Any, DataPort);
+                _dataListener.Start();
 
-            Log("FTP Server started...");
-            Task.Run(() => AcceptClientsAsync());
+                Log("FTP Server started");
+                toggleButtonEnablement();
+                Task.Run(() => AcceptClientsAsync());
+            }
+            catch(Exception ex)
+            {
+                Log($"Error {ex.Message}");
+            }
+            
         }
 
         private async Task AcceptClientsAsync()
@@ -58,7 +88,7 @@ namespace FtpSystem01App
             using (var reader = new StreamReader(networkStream, Encoding.ASCII))
             using (var writer = new StreamWriter(networkStream, Encoding.ASCII) { AutoFlush = true })
             {
-                await writer.WriteLineAsync("Server Started");
+                await writer.WriteLineAsync("Connection Accepted: Connected with server");
 
                 while (true)
                 {
@@ -103,6 +133,8 @@ namespace FtpSystem01App
                     return await StoreFileAsync(argument, writer);
                 case strCommand.DELETE:
                     return DeleteFile(argument);
+                case var value when value == strCommand.LISTFILES:
+                    return JsonConvert.SerializeObject(await GetFileNamesFromFolder(writer));
                 default:
                     return "Invalid Command";
             }
@@ -161,6 +193,27 @@ namespace FtpSystem01App
             return "Opening data connection for file list";
         }
 
+        private async Task<List<string>> GetFileNamesFromFolder(StreamWriter writer)
+        {
+            string folderPath = $"{AppDomain.CurrentDomain.BaseDirectory}\\file";
+            List<string> fileNames = new List<string>();
+
+            if (Directory.Exists(folderPath))
+            {
+                string[] files = Directory.GetFiles(folderPath);
+                foreach (string file in files)
+                {
+                    fileNames.Add(Path.GetFileName(file));
+                }
+            }
+            else
+            {
+                Console.WriteLine("The specified folder does not exist.");
+            }
+
+            return fileNames;
+        }
+
         private async Task<string> RetrieveFileAsync(string fileName, StreamWriter writer)
         {
             string executionPath = AppDomain.CurrentDomain.BaseDirectory;
@@ -206,7 +259,13 @@ namespace FtpSystem01App
                 // Write the dataStream to the file
                 using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
                 {
-                    await dataStream.CopyToAsync(fileStream);
+                    //await dataStream.CopyToAsync(fileStream);
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = await dataStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                    {
+                        await fileStream.WriteAsync(buffer, 0, bytesRead);
+                    }
                 }
             }
             dataClient.Close();
@@ -215,6 +274,9 @@ namespace FtpSystem01App
 
         private string DeleteFile(string fileName)
         {
+            string executionPath = AppDomain.CurrentDomain.BaseDirectory;
+            string directoryPath = Path.Combine(executionPath, "file");
+            fileName = directoryPath + "\\" + fileName.Replace("%20", " ");
             if (File.Exists(fileName))
             {
                 File.Delete(fileName);

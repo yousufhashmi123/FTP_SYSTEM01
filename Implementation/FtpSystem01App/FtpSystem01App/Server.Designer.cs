@@ -65,8 +65,6 @@ namespace FtpSystem01App
             // cbEnabledAD
             // 
             cbEnabledAD.AutoSize = true;
-            cbEnabledAD.Checked = true;
-            cbEnabledAD.CheckState = CheckState.Checked;
             cbEnabledAD.Location = new Point(23, 119);
             cbEnabledAD.Name = "cbEnabledAD";
             cbEnabledAD.Size = new Size(110, 24);
@@ -77,6 +75,7 @@ namespace FtpSystem01App
             // 
             // btnStopServer
             // 
+            btnStopServer.Enabled = false;
             btnStopServer.Location = new Point(233, 168);
             btnStopServer.Name = "btnStopServer";
             btnStopServer.Size = new Size(207, 29);
