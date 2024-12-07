@@ -21,6 +21,7 @@ public partial class Client : Form
     private StreamReader _commandReader;
     private StreamWriter _commandWriter;
     private List<string> _uploadedFileNames = new List<string>();
+    private string Ip;
 
     public Client()
     {
@@ -36,7 +37,7 @@ public partial class Client : Form
     private async Task HandleDataConnectionAsync(string command, string data = "")
     {
         _dataClient = new TcpClient();
-        await _dataClient.ConnectAsync("127.0.0.1", int.Parse(txtDataPort.Text));
+        await _dataClient.ConnectAsync(Ip, int.Parse(txtDataPort.Text));
         using (var dataStream = _dataClient.GetStream())
         {
             if (command == strCommand.LIST)
@@ -102,7 +103,7 @@ public partial class Client : Form
                         
                         await dataStream.WriteAsync(buffer, 0, bytesRead);
                         len++;
-                        if (len%600==0)
+                        if (len%300==0)
                         {
                             Log2("*");
                         }
@@ -128,6 +129,7 @@ public partial class Client : Form
     {
         try
         {
+
             _commandClient = new TcpClient();
             await _commandClient.ConnectAsync(txtIP.Text, int.Parse(txtComPort.Text));
             _commandStream = _commandClient.GetStream();
@@ -135,6 +137,7 @@ public partial class Client : Form
             _commandWriter = new StreamWriter(_commandStream, Encoding.ASCII) { AutoFlush = true };
 
             toggleButtonEnablement();
+            Ip = txtIP.Text;
 
 
             Log(await _commandReader.ReadLineAsync());
