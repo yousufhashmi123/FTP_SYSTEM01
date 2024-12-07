@@ -1,0 +1,7 @@
+1.Server and Client Applications: Developed Windows-based server and client applications, establishing both communication and data channels.
+2.Operation Messages: Defined operation string messages such as TRANSFER, DELETE, and RETRIEVE.
+3.File Operations: Implemented functionalities for uploading, listing, downloading, and deleting files.
+4.Authentication: Integrated optional Active Directory (AD) user authentication.
+5.Chunk-Based File Transfer: Created a mechanism for chunk-based file uploads to handle large files efficiently.
+6.Logging: Added a log view for monitoring and troubleshooting.
+7.Exception Handling: Implemented robust exception handling to ensure smooth operation.

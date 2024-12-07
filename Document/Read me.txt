@@ -1,0 +1,23 @@
+*********************************System01************************************************
+Setup Instructions:
+1.Navigate to the Release folder and run both the client and server executables in administrative mode.
+2.Start the server using the default ports (40 for command and 41 for data) or specify your desired ports.
+3.Connect the client to the server using the same ports assigned to the server.
+
+******************************************************************************************
+Functional Modules:
+1. File Operations: Supports uploading, listing, deleting, and downloading files.
+
+*******************************************************************************************
+Non-Functional Features:
+1. Communication Channels: Utilizes separate channels for command and data communication.
+2.Authentication: Supports optional Active Directory (AD) user authentication.
+3.File Transfer: Implements chunk-based file transfer for efficient handling of large files.
+4.Logging: Displays logs for troubleshooting purposes.
+5.Port Configuration: Allows configurable port assignment.
+6.IP Configuration: Supports configurable IP assignment.
+
+*********************************************************************************************
+Areas for Improvement:
+1.Security: Implement SSL-based secure file transfer.
+2.Transfer Control: Add functionality to resume or stop file transfers.
